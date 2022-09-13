@@ -1,0 +1,8 @@
+{
+    "data": "G:/Data",
+    "root": "G:/Codes/Processing",
+    "out": {
+        "sep": "G:/Results/SUA/Sep",
+        "dec": "G:/Results/SUA"
+    }
+}
