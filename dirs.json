@@ -1,8 +1,9 @@
 {
     "data": "G:/Data",
-    "root": "G:/Codes/Processing",
+    "root": "G:/Codes/sua-categorical-representation",
     "out": {
-        "sep": "G:/Results/SUA/Sep",
-        "dec": "G:/Results/SUA"
+        "sep": "G:/Results/SUA/sep",
+        "dec": "G:/Results/SUA/dec",
+        "rsa": "G:/Results/SUA/rsa"
     }
 }

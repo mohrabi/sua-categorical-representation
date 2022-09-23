@@ -54,7 +54,7 @@ for region in ['pfc']:#['it', 'pfc']:
         nmb_cls = info[ordination].groupby(info[ordination]).count().drop('none').size
         nmb_bin = time_bins.size
 
-        separabilityIndex = [];
+        separabilityIndex = []
         for seed in (pbar := tqdm(range(nmb_rep))):
             X, y, l = mkeqdata(region_data, info[ordination].to_numpy(), nmb_smp, seed=seed)
 

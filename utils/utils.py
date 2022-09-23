@@ -52,3 +52,21 @@ def init_experience(params, *args, dump_params=True):
 #     datasets['train'] = Subset(dataset, train_idx)
 #     datasets['val'] = Subset(dataset, val_idx)
 #     return datasets
+
+def mkeqdata(data, groups, n, seed=0):
+    np.random.seed(seed)
+    
+    inds, X, y, l = [], [], [], []
+    for i, g in enumerate(np.unique(groups)):
+        if 'none'==g:
+            continue
+
+        inds.append(np.random.choice(np.argwhere(groups==g).squeeze(), size=n, replace=False))
+        X.extend(data[inds[-1]])
+        y.extend(i * np.ones_like(inds[-1]))
+        l.append(g)
+    
+    X, y = np.array(X), np.array(y)
+    rind = np.random.permutation(X.shape[0])
+    X, y = X[rind], y[rind]
+    return X, y, l

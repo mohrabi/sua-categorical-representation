@@ -153,3 +153,7 @@ cython_debug/
 temp.m
 temp.ipynb
 *.asv
+utils/info.pkl
+utils/info.pkl
+dirs.json
+dirs.json
