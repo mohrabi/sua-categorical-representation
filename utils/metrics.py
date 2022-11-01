@@ -52,7 +52,8 @@ class DescriminationConfidenceEstimator:
         dist = self.mdl['svc'].decision_function(X_test) / np.linalg.norm(self.mdl['svc'].coef_)
         d0, d1 = dist[y_test==0], dist[y_test==1]
         
+        n   = X_test.shape[1]
         cfn = confusion_matrix(y_test, y_pred, labels=[0, 1], sample_weight=None, normalize=None)
         dth = np.abs(d0.mean() - d1.mean())
-        dpr = np.sqrt(2) * np.abs(d0.mean() - d1.mean()) / np.sqrt(d0.var() + d1.var())
-        return cfn, dth, dpr
+        dpr = np.sqrt(2 / n) * np.abs(d0.mean() - d1.mean()) / np.sqrt(d0.var() + d1.var())
+        return cfn, dth, dpr, d0.var(), d1.var()
