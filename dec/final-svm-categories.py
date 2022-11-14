@@ -66,8 +66,9 @@ outPath  = os.path.join(_outPath, f'{monkey.lower()}-{selectivity.lower()}')
 os.makedirs(outPath, exist_ok=True)
 
 
-for general_seed in (pbar := tqdm(range(150))):
-    pbar.set_description(f"Repetition: {general_seed}")
+for general_seed in range(132, 150):
+    print(general_seed)
+    # pbar.set_description(f"Repetition: {general_seed}")
 
     # Load the data
     itc_t, itc_v = [], []
