@@ -6,7 +6,7 @@ import sys
 import numpy as np
 import pandas as pd
 from scipy.io import loadmat
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 
 with open('../dirs.json', 'r') as f:
     dirs = json.load(f)
@@ -64,7 +64,6 @@ monkey = 'both'
 _outPath = os.path.join(dirs['out']['dec'], 'c-ovr-final')
 outPath  = os.path.join(_outPath, f'{monkey.lower()}-{selectivity.lower()}')
 os.makedirs(outPath, exist_ok=True)
-
 
 for general_seed in (pbar := tqdm(range(100))):
     pbar.set_description(f"Repetition: {general_seed}")
@@ -136,17 +135,16 @@ for general_seed in (pbar := tqdm(range(100))):
                 info = info.loc[y, :]
                 data_t, data_v = data_t[y], data_v[y]
                 y = info[category].to_numpy()
-                y = y[np.random.permutation(len(y)).flatten()]
+                yp = y[np.random.permutation(len(y)).flatten()]
                 
                 for itime in np.arange(data_t.shape[2]):
-                    out = DCE(random_state=seed).fit(X_train=data_t[:, :, itime], y_train=y).score(data_v[:, :, itime], y_test=y)
+                    out = DCE(random_state=seed).fit(X_train=data_t[:, :, itime], y_train=yp).score(data_v[:, :, itime], y_test=y)
                     _cfn.append(out[0])
                     _dth.append(out[1])
                     _dpr.append(out[2])
                     _d0v.append(out[3])
                     _d1v.append(out[4])
 
-                
                 cfn[region][category].append(_cfn)
                 dth[region][category].append(_dth)
                 dpr[region][category].append(_dpr)
