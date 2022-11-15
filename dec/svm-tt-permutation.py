@@ -16,14 +16,14 @@ from utils.metrics import DescriminationConfidenceEstimator as DCE
 
 def read_neuron(path, random_state=0):
     cm = loadmat(os.path.join(os.path.dirname(path), 'cm.mat'))['cm']
-    nstim = np.unique(cm).max()
+    # nstim = np.unique(cm).max()
         
     ua = loadmat(path)['ua']
     cm = cm[:ua.shape[0]]
     
     exit_flag = 0
     split_1, split_2 = [], []
-    for istim in np.arange(1, nstim+1):
+    for istim in np.arange(1, 166):
         np.random.seed(165 * random_state + istim)
         X = ua[(cm==istim).flatten(), :]
         nrep = X.shape[0]
@@ -60,7 +60,7 @@ _outPath = os.path.join(dirs['out']['dec'], 'c-ovr-final')
 outPath  = os.path.join(_outPath, 'time-time')
 os.makedirs(outPath, exist_ok=True)
 
-for general_seed in range(1):
+for general_seed in range(50):
     print(general_seed)
 
     # Load the data
@@ -110,50 +110,52 @@ for general_seed in range(1):
     # Model training
     for region in ['itc', 'pfc']:
         for category in ['fac', 'bod', 'nat', 'art']:
-            for seed in (range(nmb_rep)):
-                with open("./utils/info.pkl", "rb") as handler:
-                    info = pickle.load(handler)
-                info = info[:165]
-                validStimuliIndex = ((info.cat != 'none') & ((info.sfr == "A") | (info.sfr == "BI"))).to_numpy()
-                data_t = movavg(_data[f'{region}_t'][validStimuliIndex], 25, 5)
-                data_v = movavg(_data[f'{region}_v'][validStimuliIndex], 25, 5)
-                info = info[validStimuliIndex].reset_index(drop=True)
+            # for seed in (range(nmb_rep)):
+            seed = general_seed
+            with open("../utils/info.pkl", "rb") as handler:
+                info = pickle.load(handler)
+            info = info[:165]
+            validStimuliIndex = ((info.cat != 'none') & ((info.sfr == "A") | (info.sfr == "BI"))).to_numpy()
+            data_t = movavg(_data[f'{region}_t'][validStimuliIndex], 25, 5)
+            data_v = movavg(_data[f'{region}_v'][validStimuliIndex], 25, 5)
+            info = info[validStimuliIndex].reset_index(drop=True)
+        
+            _cfn, _dpr, _dth, _d0v, _d1v = [], [], [], [], []
             
-                _cfn, _dpr, _dth, _d0v, _d1v = [], [], [], [], []
-                
-                y = info[category].to_numpy()
-                y0 = np.argwhere(y).flatten()
-                y1 = np.argwhere(~y)
-                np.random.seed(seed=seed)
-                y1 = np.random.choice(y1.flatten(), size=y0.size, replace=False).flatten()
-                y = np.concatenate([y0, y1])
-                info = info.loc[y, :]
-                data_t, data_v = data_t[y], data_v[y]
-                y = info[category].to_numpy()
-                
-                for itime in np.arange(data_t.shape[2]):
-                    __cfn, __dpr, __dth, __d0v, __d1v = [], [], [], [], []
-                    for jtime in np.arange(data_t.shape[2]):
-                        mdl = DCE(random_state=seed).fit(X_train=data_t[:, :, itime], y_train=y)
-                        out = mdl.score(data_v[:, :, jtime], y_test=y)
-                        __cfn.append(out[0])
-                        __dth.append(out[1])
-                        __dpr.append(out[2])
-                        __d0v.append(out[3])
-                        __d1v.append(out[4])
-                    _cfn.append(__cfn)
-                    _dth.append(__dth)
-                    _dpr.append(__dpr)
-                    _d0v.append(__d0v)
-                    _d1v.append(__d1v)
+            y = info[category].to_numpy()
+            y0 = np.argwhere(y).flatten()
+            y1 = np.argwhere(~y)
+            np.random.seed(seed=seed)
+            y1 = np.random.choice(y1.flatten(), size=y0.size, replace=False).flatten()
+            y = np.concatenate([y0, y1])
+            info = info.loc[y, :]
+            data_t, data_v = data_t[y], data_v[y]
+            y = info[category].to_numpy()
+            y = y[np.random.permutation(len(y)).flatten()]
+            
+            for itime in np.arange(data_t.shape[2]):
+                __cfn, __dpr, __dth, __d0v, __d1v = [], [], [], [], []
+                for jtime in np.arange(data_t.shape[2]):
+                    mdl = DCE(random_state=seed).fit(X_train=data_t[:, :, itime], y_train=y)
+                    out = mdl.score(data_v[:, :, jtime], y_test=y)
+                    __cfn.append(out[0])
+                    __dth.append(out[1])
+                    __dpr.append(out[2])
+                    __d0v.append(out[3])
+                    __d1v.append(out[4])
+                _cfn.append(__cfn)
+                _dth.append(__dth)
+                _dpr.append(__dpr)
+                _d0v.append(__d0v)
+                _d1v.append(__d1v)
 
-                cfn[region][category].append(_cfn)
-                dth[region][category].append(_dth)
-                dpr[region][category].append(_dpr)
-                d0v[region][category].append(_d0v)
-                d1v[region][category].append(_d1v)
+            cfn[region][category].append(_cfn)
+            dth[region][category].append(_dth)
+            dpr[region][category].append(_dpr)
+            d0v[region][category].append(_d0v)
+            d1v[region][category].append(_d1v)
 
     # Save output of repetition
     for var, name in zip([cfn, dth, dpr, d0v, d1v], ['cfn', 'dth', 'dpr', 'd0v', 'd1v']):
-        with open(os.path.join(outPath, f'c-ovr-r-{general_seed}-{name}.pickle'), 'wb') as handle:
+        with open(os.path.join(outPath, f'c-ovr-p-{general_seed}-{name}.pickle'), 'wb') as handle:
             pickle.dump(var, handle, protocol=pickle.HIGHEST_PROTOCOL)
