@@ -23,7 +23,7 @@ def read_neuron(path, random_state=0):
     
     exit_flag = 0
     split_1, split_2 = [], []
-    for istim in np.arange(1, nstim+1):
+    for istim in np.arange(1, 166):
         np.random.seed(165 * random_state + istim)
         X = ua[(cm==istim).flatten(), :]
         nrep = X.shape[0]
@@ -60,8 +60,9 @@ _outPath = os.path.join(dirs['out']['dec'], 'c-ovr-final')
 outPath  = os.path.join(_outPath, 'time-time')
 os.makedirs(outPath, exist_ok=True)
 
-for general_seed in range(1):
-    print(general_seed)
+
+for general_seed in range(18, 100):
+    print(f"Iteration seed: {general_seed}")
 
     # Load the data
     itc_t, itc_v = [], []
@@ -72,6 +73,7 @@ for general_seed in range(1):
             if ef == 0:
                 itc_t.append(spl1)
                 itc_v.append(spl2)
+
 
     itc_t = np.transpose(itc_t, [1, 0, 2])
     itc_v = np.transpose(itc_v, [1, 0, 2])
@@ -95,6 +97,8 @@ for general_seed in range(1):
         'pfc_v': pfc_v
     }
 
+    print("Data Loaded Successfully")
+
     # Initialize result dictionaries
     cfn = {'itc': {'fac': [], 'bod': [], 'nat': [], 'art': []},
         'pfc': {'fac': [], 'bod': [], 'nat': [], 'art': []}}
@@ -110,8 +114,11 @@ for general_seed in range(1):
     # Model training
     for region in ['itc', 'pfc']:
         for category in ['fac', 'bod', 'nat', 'art']:
-            for seed in (range(nmb_rep)):
-                with open("./utils/info.pkl", "rb") as handler:
+            print(f"{region} - {category}")
+            
+            # for seed in tqdm(range(nmb_rep)):
+            for seed in [general_seed]:
+                with open("../utils/info.pkl", "rb") as handler:
                     info = pickle.load(handler)
                 info = info[:165]
                 validStimuliIndex = ((info.cat != 'none') & ((info.sfr == "A") | (info.sfr == "BI"))).to_numpy()

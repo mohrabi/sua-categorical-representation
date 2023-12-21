@@ -176,3 +176,5 @@ cornet/CORnet-RT_IT_output_feats.npy
 rsa/c-gi-p2i.pickle
 rsa/c-gi-i2c.pickle
 rsa/ground-truth.pickle
+ann/*.pkl
+sim/dcs-effect-size.eps
